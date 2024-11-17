@@ -26,14 +26,12 @@ function AuthProvider({ children }: PropsWithChildren) {
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
-      console.log(session, "ss");
       setSession(session);
     });
 
     supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
     });
-    console.log(session, "session");
   }, []);
 
   const fetchProfile = async () => {

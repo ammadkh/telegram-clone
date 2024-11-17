@@ -3,6 +3,7 @@ import { ActivityIndicator } from "react-native";
 import { StreamChat } from "stream-chat";
 import { ChannelList, Chat, OverlayProvider } from "stream-chat-expo";
 import { useAuth } from "./AuthProvider";
+import { supabase } from "@/lib/supabase";
 
 function ChatProvider({ children }: PropsWithChildren) {
   const client = StreamChat.getInstance(
@@ -17,7 +18,9 @@ function ChatProvider({ children }: PropsWithChildren) {
         {
           id: profile.id,
           name: profile.full_name,
-          image: "https://i.imgur.com/fR9Jz14.png",
+          image: supabase.storage
+            .from("avatars")
+            .getPublicUrl(profile?.avatar_url).data?.publicUrl,
         },
         client.devToken(profile.id)
       );
