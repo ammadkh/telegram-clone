@@ -2,19 +2,24 @@ import React, { PropsWithChildren, useEffect, useState } from "react";
 import { ActivityIndicator } from "react-native";
 import { StreamChat } from "stream-chat";
 import { ChannelList, Chat, OverlayProvider } from "stream-chat-expo";
+import { useAuth } from "./AuthProvider";
 
-const client = StreamChat.getInstance(process.env.EXPO_PUBLIC_STREAM_API_KEY!);
 function ChatProvider({ children }: PropsWithChildren) {
+  const client = StreamChat.getInstance(
+    process.env.EXPO_PUBLIC_STREAM_API_KEY!
+  );
   const [isReady, setIsReady] = useState(false);
+  const { profile } = useAuth();
   const connect = async () => {
+    console.log(profile.id, "profile");
     try {
       await client.connectUser(
         {
-          id: "jlahey",
-          name: "Jim Lahey",
+          id: profile.id,
+          name: profile.full_name,
           image: "https://i.imgur.com/fR9Jz14.png",
         },
-        client.devToken("jlahey")
+        client.devToken(profile.id)
       );
       setIsReady(true);
     } catch (error) {
@@ -23,14 +28,20 @@ function ChatProvider({ children }: PropsWithChildren) {
   };
 
   useEffect(() => {
+    if (!profile?.id) {
+      return;
+    }
     connect();
     return () => {
-      client.disconnectUser();
+      if (isReady) {
+        console.log("disconne");
+        client?.disconnectUser();
+      }
       setIsReady(false);
     };
-  }, []);
+  }, [profile?.id]);
 
-  if (isReady) {
+  if (!isReady) {
     return <ActivityIndicator />;
   }
 
